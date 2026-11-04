@@ -1,0 +1,61 @@
+/* page.css — the update pages' styles (index.html, legal.html, licenses.html) */
+  :root {
+    --bg: #fbf6ee; --card: #fffdf9; --ink: #4a4036; --dim: #8a7f73; --line: #e8dfd2;
+    --good: #3f8f4f; --goodbg: #e3f1e3; --care: #9a6b12; --carebg: #f7ecd2; --bad: #b4483c; --badbg: #f8e1dc;
+    --btn: #3f8f4f; --btnink: #fffdf9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1f1b17; --card: #29241f; --ink: #efe6da; --dim: #a99c8d; --line: #3a332c;
+      --goodbg: #22382a; --carebg: #3d3218; --badbg: #45241f; --btn: #5aa86a; --btnink: #1f1b17;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 32px 16px 64px; }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  .lead { color: var(--dim); margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin: 16px 0; }
+  .step { display: flex; gap: 14px; align-items: flex-start; }
+  .num { flex: 0 0 30px; height: 30px; border-radius: 50%; background: var(--line); display: grid; place-items: center;
+         font-weight: 700; font-size: 15px; }
+  .step.done .num { background: var(--goodbg); color: var(--good); }
+  .step h2 { font-size: 18px; margin: 2px 0 6px; }
+  .step p { margin: 0 0 10px; }
+  button { font: inherit; font-weight: 600; border: 0; border-radius: 12px; padding: 12px 22px; cursor: pointer;
+           background: var(--btn); color: var(--btnink); }
+  button:disabled { opacity: .45; cursor: default; }
+  .note { border-radius: 12px; padding: 12px 14px; margin: 12px 0 0; }
+  .good { background: var(--goodbg); color: var(--good); }
+  .care { background: var(--carebg); color: var(--care); }
+  .bad  { background: var(--badbg); color: var(--bad); }
+  .hidden { display: none; }
+  .bar { height: 12px; border-radius: 6px; background: var(--line); overflow: hidden; margin: 10px 0 4px; }
+  .bar > div { height: 100%; width: 0; background: var(--btn); transition: width .2s; }
+  .small { font-size: 13px; color: var(--dim); }
+  table { border-collapse: collapse; margin: 6px 0 10px; }
+  td { padding: 2px 14px 2px 0; }
+  details { margin-top: 18px; }
+  summary { cursor: pointer; color: var(--dim); font-size: 14px; }
+  pre { font: 12px/1.4 ui-monospace, Menlo, monospace; background: var(--bg); border: 1px solid var(--line);
+        border-radius: 10px; padding: 10px; max-height: 260px; overflow: auto; white-space: pre-wrap; }
+  .latest { display: inline-block; font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: 999px;
+            background: var(--line); color: var(--ink); margin: 0 0 8px; }
+  .latest.none { color: var(--dim); font-weight: 500; }
+  .howto h2 { font-size: 17px; margin: 0 0 8px; }
+  .howto ol { margin: 0; padding-left: 22px; }
+  .howto li { margin: 3px 0; }
+  .howto .small { margin: 10px 0 0; }
+  footer { max-width: 640px; margin: 40px auto 0; padding-top: 14px; border-top: 1px solid var(--line);
+           color: var(--dim); font-size: 14px; }
+  .grow { flex: 1; }
+  a { color: var(--good); }
+  footer a { color: var(--dim); }
+  .doc h2 { font-size: 20px; margin: 28px 0 8px; }
+  .doc h3 { font-size: 16px; margin: 18px 0 4px; }
+  .doc p, .doc li { margin: 6px 0; }
+  .doc table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .doc th, .doc td { text-align: left; vertical-align: top; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); }
+  .doc details pre { max-height: 360px; }
+  .doc code { font: 13px ui-monospace, Menlo, monospace; }
