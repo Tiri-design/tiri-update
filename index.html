@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiri hub update</title>
+<style>
+  :root {
+    --bg: #fbf6ee; --card: #fffdf9; --ink: #4a4036; --dim: #8a7f73; --line: #e8dfd2;
+    --good: #3f8f4f; --goodbg: #e3f1e3; --care: #9a6b12; --carebg: #f7ecd2; --bad: #b4483c; --badbg: #f8e1dc;
+    --btn: #3f8f4f; --btnink: #fffdf9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1f1b17; --card: #29241f; --ink: #efe6da; --dim: #a99c8d; --line: #3a332c;
+      --goodbg: #22382a; --carebg: #3d3218; --badbg: #45241f; --btn: #5aa86a; --btnink: #1f1b17;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 32px 16px 64px; }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  .lead { color: var(--dim); margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin: 16px 0; }
+  .step { display: flex; gap: 14px; align-items: flex-start; }
+  .num { flex: 0 0 30px; height: 30px; border-radius: 50%; background: var(--line); display: grid; place-items: center;
+         font-weight: 700; font-size: 15px; }
+  .step.done .num { background: var(--goodbg); color: var(--good); }
+  .step h2 { font-size: 18px; margin: 2px 0 6px; }
+  .step p { margin: 0 0 10px; }
+  button { font: inherit; font-weight: 600; border: 0; border-radius: 12px; padding: 12px 22px; cursor: pointer;
+           background: var(--btn); color: var(--btnink); }
+  button:disabled { opacity: .45; cursor: default; }
+  .note { border-radius: 12px; padding: 12px 14px; margin: 12px 0 0; }
+  .good { background: var(--goodbg); color: var(--good); }
+  .care { background: var(--carebg); color: var(--care); }
+  .bad  { background: var(--badbg); color: var(--bad); }
+  .hidden { display: none; }
+  .bar { height: 12px; border-radius: 6px; background: var(--line); overflow: hidden; margin: 10px 0 4px; }
+  .bar > div { height: 100%; width: 0; background: var(--btn); transition: width .2s; }
+  .small { font-size: 13px; color: var(--dim); }
+  table { border-collapse: collapse; margin: 6px 0 10px; }
+  td { padding: 2px 14px 2px 0; }
+  details { margin-top: 18px; }
+  summary { cursor: pointer; color: var(--dim); font-size: 14px; }
+  pre { font: 12px/1.4 ui-monospace, Menlo, monospace; background: var(--bg); border: 1px solid var(--line);
+        border-radius: 10px; padding: 10px; max-height: 260px; overflow: auto; white-space: pre-wrap; }
+  .latest { display: inline-block; font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: 999px;
+            background: var(--line); color: var(--ink); margin: 0 0 8px; }
+  .latest.none { color: var(--dim); font-weight: 500; }
+  .howto h2 { font-size: 17px; margin: 0 0 8px; }
+  .howto ol { margin: 0; padding-left: 22px; }
+  .howto li { margin: 3px 0; }
+  .howto .small { margin: 10px 0 0; }
+  footer { max-width: 640px; margin: 40px auto 0; padding-top: 14px; border-top: 1px solid var(--line);
+           color: var(--dim); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Update your Tiri hub</h1>
+  <p class="latest none" id="latest">Checking for the latest version…</p>
+  <p class="lead">Everything stays: tag names, the weekly plan and all settings. Takes about a minute.</p>
+
+  <section class="card howto" aria-labelledby="howto-h">
+    <h2 id="howto-h">How to update</h2>
+    <ol>
+      <li>Use <b>Chrome</b> or <b>Edge</b> on a computer. Safari, Firefox and phones can't do this.</li>
+      <li>Plug the hub into the computer with a <b>USB-C data cable</b> (some cables only charge).</li>
+      <li>Press <b>Connect</b> and choose <b>USB JTAG/serial debug unit</b> in the list.</li>
+      <li>Press <b>Update</b>. <b>Don't unplug the hub while it writes</b>; it says when it's done.</li>
+    </ol>
+    <p class="small">Tag names and settings are kept. If an update is interrupted, plug the hub in again and repeat: nothing is lost.</p>
+  </section>
+
+  <div id="nobrowser" class="card bad hidden">
+    This page needs <b>Chrome</b> or <b>Edge</b> on a computer (Mac, Windows, Linux).
+    Safari, Firefox and phones can't talk to USB devices.
+  </div>
+
+  <div id="steps">
+    <div class="card step" id="s1">
+      <div class="num">1</div>
+      <div>
+        <h2>Plug the hub into this computer</h2>
+        <p>Use a USB-C data cable. The hub can stay on the wall if the cable reaches.
+           Close the Arduino Serial Monitor if it is open.</p>
+      </div>
+    </div>
+
+    <div class="card step" id="s2">
+      <div class="num">2</div>
+      <div style="flex:1">
+        <h2>Connect</h2>
+        <p>Choose <b>USB JTAG/serial debug unit</b> in the list that opens.</p>
+        <button id="connect">Connect to the hub</button>
+        <div id="verinfo" class="hidden">
+          <table>
+            <tr><td>On the hub now</td><td id="vnow">…</td></tr>
+            <tr><td>On this page</td><td id="vnew">…</td></tr>
+          </table>
+        </div>
+        <div id="cnote" class="note hidden"></div>
+      </div>
+    </div>
+
+    <div class="card step" id="s3">
+      <div class="num">3</div>
+      <div style="flex:1">
+        <h2>Update</h2>
+        <p>Keep the cable plugged in until it says done. The screen goes dark for a moment.</p>
+        <button id="update" disabled>Update the hub</button>
+        <div id="prog" class="hidden">
+          <div class="bar"><div id="barfill"></div></div>
+          <div class="small" id="progtext">Starting…</div>
+        </div>
+        <div id="unote" class="note hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <details>
+    <summary>Details (for support)</summary>
+    <pre id="log"></pre>
+  </details>
+</main>
+<footer>Tiri</footer>
+
+<script type="module">
+import { ESPLoader, Transport } from "./vendor/esptool-js-0.6.1/bundle.js";
+import { readLatest, loadRelease, readHubVersion, flashHub } from "./flash.js";
+
+const $ = (id) => document.getElementById(id);
+const logEl = $("log");
+const log = (t) => { logEl.textContent += t.replace(/\r/g, "") + (t.endsWith("\n") ? "" : "\n"); logEl.scrollTop = 1e9; };
+const note = (el, cls, html) => { el.className = "note " + cls; el.innerHTML = html; };
+const ESPRESSIF_VID = 0x303a;
+
+let release = null, port = null;
+
+if (!("serial" in navigator)) {
+  $("nobrowser").classList.remove("hidden");
+  $("steps").classList.add("hidden");
+}
+
+// The version line, then the release itself. No latest.json = nothing
+// published yet: say so plainly, nothing to connect to.
+const noUpdate = (cls, html) => {
+  note($("cnote"), cls, html);
+  $("cnote").classList.remove("hidden");
+  $("connect").disabled = true;
+};
+let latest = null;
+try { latest = await readLatest("./firmware/"); } catch (e) { log("latest.json: " + e.message); }
+if (latest) {
+  $("latest").textContent = "Latest: " + latest.version;
+  $("latest").classList.remove("none");
+  try {
+    release = await loadRelease("./firmware/");
+    $("vnew").textContent = "v" + release.version + (release.built ? "  (" + release.built + ")" : "");
+    log("Release " + release.version + ": " + release.files.map((f) => f.path + "@0x" + f.address.toString(16)).join(", "));
+  } catch (e) {
+    log("Release: " + e.message);
+    noUpdate("bad", "The update files on this page can't be used right now (" + e.message + "). Please try again later.");
+  }
+} else {
+  $("latest").textContent = "No update available yet";
+  log("No release published (no firmware/latest.json).");
+  noUpdate("care", "<b>No update available yet.</b> Your hub keeps working as it is. Check this page again later.");
+}
+
+async function findPortAgain(ms) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) {
+    const ports = (await navigator.serial.getPorts()).filter((p) => p.getInfo().usbVendorId === ESPRESSIF_VID);
+    if (ports.length) return ports[0];
+    await new Promise((r) => setTimeout(r, 400));
+  }
+  return null;
+}
+
+function showVersion(v) {
+  $("verinfo").classList.remove("hidden");
+  if (!v) $("vnow").textContent = "no answer (it may be stuck: updating usually fixes that)";
+  else if (v.old) $("vnow").textContent = "older than v0.18";
+  else $("vnow").textContent = "v" + v.version + (v.built ? "  (" + v.built + ")" : "");
+}
+
+$("connect").onclick = async () => {
+  try {
+    port = await navigator.serial.requestPort({ filters: [{ usbVendorId: ESPRESSIF_VID }] });
+  } catch (e) { return; }                                  // the user closed the list
+  $("connect").disabled = true;
+  $("connect").textContent = "Reading the hub…";
+  let v = null;
+  try { v = await readHubVersion(port); } catch (e) { log("version: " + e.message); }
+  log("Hub says: " + JSON.stringify(v));
+  showVersion(v);
+  $("connect").textContent = "Connected";
+  $("s2").classList.add("done");
+  $("cnote").classList.remove("hidden");
+  if (v && v.version === release.version) note($("cnote"), "good", "The hub already has this version. You can update anyway.");
+  else note($("cnote"), "care", "Ready to update.");
+  $("update").disabled = false;
+};
+
+$("update").onclick = async () => {
+  $("update").disabled = true;
+  $("prog").classList.remove("hidden");
+  $("unote").classList.add("hidden");
+  const set = (f) => { $("barfill").style.width = Math.round(f * 100) + "%"; $("progtext").textContent = "Writing… " + Math.round(f * 100) + " %"; };
+  try {
+    await flashHub(port, release, { ESPLoader, Transport }, { log, progress: set });
+    $("progtext").textContent = "Restarting the hub…";
+    await new Promise((r) => setTimeout(r, 2500));
+    const again = (await findPortAgain(10000)) || port;
+    let v = null;
+    try { v = await readHubVersion(again, { timeoutMs: 12000 }); } catch (e) { log("version after: " + e.message); }
+    log("Hub says after the update: " + JSON.stringify(v));
+    showVersion(v);
+    $("progtext").textContent = "Done";
+    $("s3").classList.add("done");
+    if (v && v.version === release.version) note($("unote"), "good", "<b>Done.</b> The hub runs v" + v.version + ". You can unplug it.");
+    else note($("unote"), "care", "<b>Written.</b> The hub didn't confirm its version yet. If its screen is back, all is well; otherwise unplug it, plug it in again and repeat.");
+  } catch (e) {
+    log("ERROR: " + (e && e.message ? e.message : e));
+    note($("unote"), "bad", "<b>The update didn't finish.</b> Nothing is lost: unplug the hub, plug it in again and repeat from step 2. (" +
+         (e && e.message ? e.message : e) + ")");
+    $("update").disabled = false;
+  }
+  $("unote").classList.remove("hidden");
+};
+</script>
+</body>
+</html>
