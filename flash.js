@@ -125,6 +125,13 @@ export function parseVersionLine(line) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Another program has the hub's port open (a serial monitor such as the Arduino
+// IDE's, a terminal, the page in another tab): the browser can't open it. Web
+// Serial rejects open() with a NetworkError ("Failed to open serial port.").
+export function portBusy(e) {
+  return !!e && (e.name === "NetworkError" || /failed to open serial port/i.test(String(e.message || e)));
+}
+
 // "t 2026-11-04 07:05:00": the hub's serial clock command, in the computer's local time
 export function clockCommand(d) {
   const p = (n) => String(n).padStart(2, "0");

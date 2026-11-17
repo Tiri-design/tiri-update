@@ -1,7 +1,7 @@
 // page.js — the update page (index.html). A file of its own, so the page's
 // Content-Security-Policy can forbid inline scripts.
 import { ESPLoader, Transport } from "./vendor/esptool-js-0.6.1/bundle.js";
-import { readLatest, loadRelease, readHubVersion, flashHub, browserSupport } from "./flash.js";
+import { readLatest, loadRelease, readHubVersion, flashHub, browserSupport, portBusy } from "./flash.js";
 
 const $ = (id) => document.getElementById(id);
 const logEl = $("log");
@@ -10,6 +10,10 @@ const note = (el, cls, html) => { el.className = "note " + cls; el.innerHTML = h
 const ESPRESSIF_VID = 0x303a;
 
 let release = null, port = null;
+
+// the port is held by another program (flash.js portBusy)
+const BUSY = "<b>Another program is using the hub's connection</b>: a serial monitor (for example the Arduino IDE's), " +
+  "a terminal, or this page in another tab. Close it, unplug the hub, plug it in again, then connect again.";
 
 // Web Serial: Chrome, Edge, Firefox 151+ on a computer (flash.js browserSupport)
 const NOBROWSER = {
@@ -91,8 +95,15 @@ $("connect").onclick = async () => {
   } catch (e) { return; }                                  // the user closed the list
   $("connect").disabled = true;
   $("connect").textContent = "Reading the hub…";
-  let v = null;
-  try { v = await readHubVersion(port, { setClock: true }); } catch (e) { log("version: " + e.message); }
+  let v = null, busy = false;
+  try { v = await readHubVersion(port, { setClock: true }); } catch (e) { log("version: " + e.message); busy = portBusy(e); }
+  if (busy) {                                              // not connected: say why, offer Connect again
+    $("connect").disabled = false;
+    $("connect").textContent = "Connect to the hub";
+    note($("cnote"), "bad", BUSY);
+    $("update").disabled = true;
+    return;
+  }
   log("Hub says: " + JSON.stringify(v));
   showVersion(v);
   $("connect").textContent = "Connected";
@@ -123,7 +134,8 @@ $("update").onclick = async () => {
     else note($("unote"), "care", "<b>Written.</b> The hub didn't confirm its version yet. If its screen is back, all is well; otherwise unplug it, plug it in again and repeat.");
   } catch (e) {
     log("ERROR: " + (e && e.message ? e.message : e));
-    note($("unote"), "bad", "<b>The update didn't finish.</b> Nothing is lost: unplug the hub, plug it in again and repeat from step 2. (" +
+    if (portBusy(e)) note($("unote"), "bad", BUSY + " Nothing was written.");
+    else note($("unote"), "bad", "<b>The update didn't finish.</b> Nothing is lost: unplug the hub, plug it in again and repeat from step 2. (" +
          (e && e.message ? e.message : e) + ")");
     $("update").disabled = false;
   }
