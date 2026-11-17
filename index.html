@@ -18,7 +18,8 @@
   <section class="card howto" aria-labelledby="howto-h">
     <h2 id="howto-h">How to update</h2>
     <ol>
-      <li>Use <b>Chrome</b> or <b>Edge</b> on a computer. Safari, Firefox and phones can't do this.</li>
+      <li>Use <b>Chrome</b>, <b>Edge</b> or <b>Firefox</b> (version 151 or newer) on a computer.
+          On Safari or a phone: see <a href="#file-h">Update with a file</a> below.</li>
       <li>Plug the hub into the computer with a <b>USB-C data cable</b> (some cables only charge).</li>
       <li>Press <b>Connect</b> and choose <b>USB JTAG/serial debug unit</b> in the list.</li>
       <li>Press <b>Update</b>. <b>Don't unplug the hub while it writes</b>; it says when it's done.</li>
@@ -26,9 +27,10 @@
     <p class="small">Tag names and settings are kept. If an update is interrupted, plug the hub in again and repeat: nothing is lost.</p>
   </section>
 
-  <div id="nobrowser" class="card bad hidden">
-    This page needs <b>Chrome</b> or <b>Edge</b> on a computer (Mac, Windows, Linux).
-    Safari, Firefox and phones can't talk to USB devices.
+  <div id="nobrowser" class="card bad hidden"></div>
+  <div id="ffnote" class="card note care hidden">
+    <b>Firefox:</b> the first time, Firefox asks whether this site may use serial ports
+    (it adds a small site permission). Allow it, then choose the hub in the list.
   </div>
 
   <div id="steps">
@@ -51,6 +53,7 @@
           <table>
             <tr><td>On the hub now</td><td id="vnow">…</td></tr>
             <tr><td>On this page</td><td id="vnew">…</td></tr>
+            <tr id="clockinfo" class="hidden"><td>Hub clock set to</td><td id="vclock">…</td></tr>
           </table>
         </div>
         <div id="cnote" class="note hidden"></div>
@@ -71,6 +74,22 @@
       </div>
     </div>
   </div>
+
+  <section class="card howto" id="file" aria-labelledby="file-h">
+    <h2 id="file-h">Update with a file</h2>
+    <p>Any browser works, Safari too, on a Mac, a Windows PC or Linux. For hubs with version 0.29 or newer
+       (the version is at the bottom of the hub's Settings).</p>
+    <ol>
+      <li><a id="fileget" class="hidden" href="#">Download the update file</a><span id="filenone">No update file available yet.</span></li>
+      <li>On the hub: <b>Settings</b> (the dots, top right), then <b>Hub</b>, then <b>Update the hub</b>.</li>
+      <li>Plug the hub into the computer with a <b>USB-C data cable</b>. A drive called <b>TIRI-HUB</b> appears.</li>
+      <li>Drag the file onto <b>TIRI-HUB</b>. The hub checks it and restarts. Done.</li>
+    </ol>
+    <p class="small">Your computer may say the drive was removed without ejecting: that's fine. Tag names and settings
+       are kept. A wrong or damaged file changes nothing: the hub says so. If a new version doesn't start, the hub
+       goes back to the one before by itself.</p>
+    <p class="small">Hubs older than 0.29: update once with Chrome, Edge or Firefox above. After that, files work too.</p>
+  </section>
 
   <details>
     <summary>Details (for support)</summary>

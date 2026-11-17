@@ -1,0 +1,40 @@
+{
+  "name": "Tiri door hub",
+  "board": "main board rev C (ESP32-S3)",
+  "version": "0.29-revC",
+  "built": "Nov 17 2026 05:16:34",
+  "chip": "ESP32-S3",
+  "flash_size": "16MB",
+  "parts": [
+    {
+      "path": "bootloader.bin",
+      "offset": 0,
+      "size": 19968,
+      "md5": "30363f24d704e78a388efd916c764a33"
+    },
+    {
+      "path": "partitions.bin",
+      "offset": 32768,
+      "size": 3072,
+      "md5": "ba686c6c6fdf2b963448683d5bbd8380"
+    },
+    {
+      "path": "boot_app0.bin",
+      "offset": 57344,
+      "size": 8192,
+      "md5": "e6327541e2dc394ca2c3b3280ac0f39f"
+    },
+    {
+      "path": "hub.bin",
+      "offset": 65536,
+      "size": 1022480,
+      "md5": "6b5374b3a00689eb2d6fc4ab753323cd"
+    }
+  ],
+  "file": {
+    "path": "tiri-hub-0.29-revC.uf2",
+    "size": 2045440,
+    "md5": "8c58d3d1e0a299c5209aebdc4a7380ba",
+    "hubs_from": "0.29-revC"
+  }
+}

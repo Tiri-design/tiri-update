@@ -55,6 +55,11 @@ export function checkManifest(m) {
     const end = p.offset + Math.ceil(p.size / 4096) * 4096;     // the chip erases whole 4 KB sectors before writing
     if (p.offset < NVS_END && end > NVS_START) throw new Error(p.path + " would overwrite the settings area");
   }
+  // v0.29: the update file (hubs v0.29+ take it as the USB drive TIRI-HUB, any browser). Optional.
+  if (m.file !== undefined) {
+    if (!m.file || m.file.path !== "tiri-hub-" + m.version + ".uf2" || !Number.isInteger(m.file.size) || m.file.size <= 0 ||
+        m.file.size % 512) throw new Error("the update file entry is wrong");
+  }
   return true;
 }
 
@@ -89,7 +94,26 @@ export async function loadRelease(base, fetchFn = fetch) {
     files.push({ path: p.path, address: p.offset, data });
   }
   files.sort((a, b) => a.address - b.address);
-  return { version: m.version, built: m.built || "", files };
+  // v0.29: the update file is only linked (downloaded by the person), not loaded here
+  const file = m.file ? { href: dir + m.file.path, name: m.file.path, size: m.file.size } : null;
+  return { version: m.version, built: m.built || "", files, file };
+}
+
+// ---------------------------------------------------------------- browser
+// What this browser can do. Web Serial: Chrome and Edge (since 89), Firefox on
+// a computer since 151 (May 2026; it asks once to allow the site, a small
+// "site permission add-on"). Safari has no Web Serial (Apple opposes it).
+// ua = navigator.userAgent, hasSerial = "serial" in navigator.
+//   {serial: true, firefox}            this page can update the hub here
+//   {serial: false, why: "safari" | "firefox_old" | "firefox_off" | "phone" | "other", version?}
+export function browserSupport(ua, hasSerial) {
+  const ff = /(?:Firefox|FxiOS)\/(\d+)/.exec(ua);
+  if (/Android|iPhone|iPod|Mobile/i.test(ua)) return { serial: false, why: "phone" };
+  if (hasSerial) return { serial: true, firefox: !!ff };
+  if (ff && Number(ff[1]) < 151) return { serial: false, why: "firefox_old", version: Number(ff[1]) };
+  if (ff) return { serial: false, why: "firefox_off" };          // 151+ without it: turned off (company policy?)
+  if (/Safari\//.test(ua) && !/Chrome\/|Chromium\/|Edg\//.test(ua)) return { serial: false, why: "safari" };
+  return { serial: false, why: "other" };
 }
 
 // ---------------------------------------------------------------- hub version
@@ -101,11 +125,21 @@ export function parseVersionLine(line) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// "t 2026-11-04 07:05:00": the hub's serial clock command, in the computer's local time
+export function clockCommand(d) {
+  const p = (n) => String(n).padStart(2, "0");
+  return "t " + d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " +
+         p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+}
+
 // Asks the hub for its version over plain serial. Copes with the hub
 // restarting when the port opens (it answers ~3 s later): resends 'v'.
 // Returns {version, built}; {version: null, old: true} for a hub from before
 // v0.18 (it answers "? for help"); null if nothing answers (e.g. crash loop).
-export async function readHubVersion(port, { timeoutMs = 9000, now = () => Date.now() } = {}) {
+// With setClock (v0.29): a hub that answered its version also gets the
+// computer's time ('t'); result.clock is the time the hub reports back, or
+// false if it has no clock chip / didn't confirm.
+export async function readHubVersion(port, { timeoutMs = 9000, now = () => Date.now(), setClock = false, clockNow = () => new Date() } = {}) {
   await port.open({ baudRate: 115200 });
   const enc = new TextEncoder(), dec = new TextDecoder();
   const writer = port.writable.getWriter();
@@ -113,20 +147,39 @@ export async function readHubVersion(port, { timeoutMs = 9000, now = () => Date.
   let buf = "", result = null;
   const end = now() + timeoutMs;
   let nextSend = 0;
-  try {
-    while (now() < end && !result) {
-      if (now() >= nextSend) { await writer.write(enc.encode("v\n")); nextSend = now() + 1500; }
+  // reads lines until test(line) gives something other than undefined, or the time is up
+  const readUntil = async (until, test, resend) => {
+    while (now() < until) {
+      if (resend && now() >= nextSend) { await writer.write(enc.encode(resend() + "\n")); nextSend = now() + 1500; }
       const r = await Promise.race([reader.read(), sleep(250).then(() => null)]);
       if (r === null) continue;
-      if (r.done) break;
+      if (r.done) return undefined;
       buf += dec.decode(r.value, { stream: true });
       let i;
       while ((i = buf.indexOf("\n")) >= 0) {
-        const line = buf.slice(0, i); buf = buf.slice(i + 1);
-        const v = parseVersionLine(line);
-        if (v) { result = v; break; }
-        if (line.includes("? for help")) { result = { version: null, built: "", old: true }; break; }   // a hub before v0.18
+        const line = buf.slice(0, i).replace(/\r$/, ""); buf = buf.slice(i + 1);
+        const x = test(line);
+        if (x !== undefined) return x;
       }
+    }
+    return undefined;
+  };
+  try {
+    result = (await readUntil(end, (line) => {
+      const v = parseVersionLine(line);
+      if (v) return v;
+      if (line.includes("? for help")) return { version: null, built: "", old: true };   // a hub before v0.18
+      return undefined;
+    }, () => "v")) || null;
+    if (result && result.version && setClock) {
+      nextSend = 0;
+      const c = await readUntil(now() + 4000, (line) => {
+        const m = /^# rtc set: (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)/.exec(line.trim());
+        if (m) return m[1];
+        if (line.includes("# use: t ") || line.includes("USE_RTC is 0")) return false;   // no clock chip
+        return undefined;
+      }, () => clockCommand(clockNow()));
+      result.clock = c === undefined ? false : c;
     }
   } finally {
     try { await reader.cancel(); } catch (e) {}

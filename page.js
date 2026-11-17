@@ -1,7 +1,7 @@
 // page.js — the update page (index.html). A file of its own, so the page's
 // Content-Security-Policy can forbid inline scripts.
 import { ESPLoader, Transport } from "./vendor/esptool-js-0.6.1/bundle.js";
-import { readLatest, loadRelease, readHubVersion, flashHub } from "./flash.js";
+import { readLatest, loadRelease, readHubVersion, flashHub, browserSupport } from "./flash.js";
 
 const $ = (id) => document.getElementById(id);
 const logEl = $("log");
@@ -11,9 +11,26 @@ const ESPRESSIF_VID = 0x303a;
 
 let release = null, port = null;
 
-if (!("serial" in navigator)) {
+// Web Serial: Chrome, Edge, Firefox 151+ on a computer (flash.js browserSupport)
+const NOBROWSER = {
+  safari: "<b>Safari can't update the hub from this page</b>: it has no access to USB devices. " +
+          "Use <a href=\"#file-h\">Update with a file</a> below, or open this page in Chrome, Edge or Firefox.",
+  firefox_old: "<b>Firefox can update the hub from version 151 on.</b> This one is version %v: " +
+               "update it (menu, Help, About Firefox), or use <a href=\"#file-h\">Update with a file</a> below.",
+  firefox_off: "<b>This Firefox has USB access turned off</b> (often a company setting). " +
+               "Use <a href=\"#file-h\">Update with a file</a> below, or Chrome or Edge.",
+  phone: "<b>Phones can't update the hub from this page.</b> Use a computer: Chrome, Edge or Firefox, " +
+         "or any browser with <a href=\"#file-h\">Update with a file</a> below.",
+  other: "<b>This browser can't talk to USB devices.</b> Use Chrome, Edge or Firefox (151 or newer) on a computer, " +
+         "or <a href=\"#file-h\">Update with a file</a> below.",
+};
+const support = browserSupport(navigator.userAgent, "serial" in navigator);
+if (!support.serial) {
+  $("nobrowser").innerHTML = NOBROWSER[support.why].replace("%v", String(support.version || ""));
   $("nobrowser").classList.remove("hidden");
   $("steps").classList.add("hidden");
+} else if (support.firefox) {
+  $("ffnote").classList.remove("hidden");
 }
 
 // The version line, then the release itself. No latest.json = nothing
@@ -31,6 +48,13 @@ if (latest) {
   try {
     release = await loadRelease("./firmware/");
     $("vnew").textContent = "v" + release.version + (release.built ? "  (" + release.built + ")" : "");
+    if (release.file) {                                    // v0.29: Update with a file
+      $("fileget").href = release.file.href;
+      $("fileget").setAttribute("download", release.file.name);
+      $("fileget").textContent = "Download " + release.file.name + " (" + (release.file.size / 1048576).toFixed(1) + " MB)";
+      $("fileget").classList.remove("hidden");
+      $("filenone").classList.add("hidden");
+    }
     log("Release " + release.version + ": " + release.files.map((f) => f.path + "@0x" + f.address.toString(16)).join(", "));
   } catch (e) {
     log("Release: " + e.message);
@@ -57,6 +81,8 @@ function showVersion(v) {
   if (!v) $("vnow").textContent = "no answer (it may be stuck: updating usually fixes that)";
   else if (v.old) $("vnow").textContent = "older than v0.18";
   else $("vnow").textContent = "v" + v.version + (v.built ? "  (" + v.built + ")" : "");
+  // v0.29: the hub's clock is set to this computer's time while connected
+  if (v && v.clock) { $("clockinfo").classList.remove("hidden"); $("vclock").textContent = v.clock.slice(0, 16) + " (this computer's time)"; }
 }
 
 $("connect").onclick = async () => {
@@ -66,7 +92,7 @@ $("connect").onclick = async () => {
   $("connect").disabled = true;
   $("connect").textContent = "Reading the hub…";
   let v = null;
-  try { v = await readHubVersion(port); } catch (e) { log("version: " + e.message); }
+  try { v = await readHubVersion(port, { setClock: true }); } catch (e) { log("version: " + e.message); }
   log("Hub says: " + JSON.stringify(v));
   showVersion(v);
   $("connect").textContent = "Connected";
@@ -88,7 +114,7 @@ $("update").onclick = async () => {
     await new Promise((r) => setTimeout(r, 2500));
     const again = (await findPortAgain(10000)) || port;
     let v = null;
-    try { v = await readHubVersion(again, { timeoutMs: 12000 }); } catch (e) { log("version after: " + e.message); }
+    try { v = await readHubVersion(again, { timeoutMs: 12000, setClock: true }); } catch (e) { log("version after: " + e.message); }
     log("Hub says after the update: " + JSON.stringify(v));
     showVersion(v);
     $("progtext").textContent = "Done";
