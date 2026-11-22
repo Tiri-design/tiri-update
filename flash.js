@@ -198,6 +198,20 @@ export async function readHubVersion(port, { timeoutMs = 9000, now = () => Date.
 }
 
 // ---------------------------------------------------------------- flashing
+// Restart the hub into its new firmware. The ESP32-S3's USB serial port resets
+// the chip with its RTS line (EN) and reads DTR as the boot pin: DTR released
+// (start the firmware, not the bootloader), then RTS pulled and released.
+// esptool-js 0.6.1's "hard_reset" only releases RTS (Espressif's esptool pulls it
+// first), so whether the hub restarted depended on the computer's USB driver: on
+// one it stayed in the bootloader until it was unplugged (field test, 2026-11-18).
+export async function restartHub(transport, wait = sleep) {
+  await transport.setDTR(false);
+  await transport.setRTS(true);
+  await wait(100);
+  await transport.setRTS(false);
+  await wait(200);
+}
+
 // Writes the release. 'lib' = { ESPLoader, Transport } from esptool-js.
 // log(text) and progress(fraction 0..1) report to the page.
 export async function flashHub(port, release, lib, { log = () => {}, progress = () => {} } = {}) {
@@ -224,7 +238,7 @@ export async function flashHub(port, release, lib, { log = () => {}, progress = 
     });
     progress(1);
     log("Written and verified. Restarting the hub.");
-    await loader.after("hard_reset");
+    await restartHub(transport);
   } finally {
     try { await transport.disconnect(); } catch (e) {}
   }
