@@ -10,33 +10,37 @@
 <link rel="stylesheet" href="page.css">
 </head>
 <body>
+<header class="top"><span class="brand">Tiri</span><span class="brand-sub">Hub update</span></header>
 <main class="doc">
-  <p><a href="./">&larr; Update page</a></p>
+  <p><a href="./">&larr; Back to the update</a></p>
   <h1>Privacy and contact</h1>
 
   <h2 id="about">About this page</h2>
   <p>This page updates Tiri hub prototypes that are being tested. Tiri is based in Taiwan.
-     Questions, problems or a security concern: <a href="mailto:hello@tiri-launchpad.com">hello@tiri-launchpad.com</a>.</p>
+     For questions, problems or a security concern, write to us at
+     <a href="mailto:hello@tiri-launchpad.com">hello@tiri-launchpad.com</a>.</p>
 
   <h2 id="privacy">Privacy</h2>
   <ul>
     <li>This page uses no cookies, no analytics and no trackers, and loads nothing from other websites.</li>
-    <li>When you connect the hub, your browser talks to it over USB: it reads the hub's version and
-        writes the update. That stays between your browser and the hub; nothing is sent to us.</li>
+    <li>When you connect your hub, your browser talks to it over USB. It reads the hub's version, sets the
+        hub's clock to your computer's time and writes the update. All of this stays between your browser
+        and the hub. Nothing is sent to us.</li>
     <li>The page is hosted on GitHub Pages. To deliver it, GitHub processes technical data such as your
-        IP address; see GitHub's General Privacy Statement on docs.github.com.</li>
+        IP address. You'll find the details in GitHub's General Privacy Statement on docs.github.com.</li>
     <li>If you email us, we use your message and address only to answer you, and delete them when they are
         no longer needed. You can ask what we hold about you, or ask us to correct or delete it, at the
         address above.</li>
   </ul>
 
   <h2 id="updates">What an update changes</h2>
-  <p>An update replaces the hub's firmware only. Tag names, settings, the weekly plan and the paired
-     tags stay: the page never writes the hub's settings area. Every part is checked against its
-     published checksum before and after writing.</p>
+  <p>An update replaces the hub's software and nothing else. Your tags, their names, the weekly plan and all
+     settings stay as they are, because the page never writes to the part of the hub where they're kept.
+     Every piece of the update is checked against its published checksum before and after it's written.</p>
 
   <h2 id="licences">Open-source software</h2>
-  <p>The firmware and this page use open-source software: <a href="licenses.html">licences and source</a>.</p>
+  <p>The hub's software and this page are built with open-source software. See the
+     <a href="licenses.html">licences and source</a>.</p>
 </main>
 <footer>Tiri · <a href="./">Update page</a> · <a href="licenses.html">Open-source licences</a></footer>
 </body>

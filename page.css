@@ -1,57 +1,123 @@
-/* page.css — the update pages' styles (index.html, legal.html, licenses.html) */
+/* page.css — the update pages' styles (index.html, legal.html, licenses.html).
+   The hub's own colours: warm cream, green for go and done, amber for "have a look". */
   :root {
-    --bg: #fbf6ee; --card: #fffdf9; --ink: #4a4036; --dim: #8a7f73; --line: #e8dfd2;
-    --good: #3f8f4f; --goodbg: #e3f1e3; --care: #9a6b12; --carebg: #f7ecd2; --bad: #b4483c; --badbg: #f8e1dc;
-    --btn: #3f8f4f; --btnink: #fffdf9;
+    --bg: #fbf6ee; --card: #fffdf9; --ink: #3f362d; --dim: #7d7266; --line: #e8dfd2; --soft: #f3ece1;
+    --good: #2f7a3e; --goodbg: #e3f1e3; --care: #8a5d0c; --carebg: #f7ecd2; --bad: #a83e33; --badbg: #f8e1dc;
+    --btn: #3f8f4f; --btnhover: #357a43; --btnink: #fffdf9; --focus: #3f8f4f;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #1f1b17; --card: #29241f; --ink: #efe6da; --dim: #a99c8d; --line: #3a332c;
-      --goodbg: #22382a; --carebg: #3d3218; --badbg: #45241f; --btn: #5aa86a; --btnink: #1f1b17;
+      --bg: #1f1b17; --card: #29241f; --ink: #efe6da; --dim: #a99c8d; --line: #3a332c; --soft: #312b25;
+      --good: #8fcf9a; --goodbg: #22382a; --care: #e3bd72; --carebg: #3d3218; --bad: #f0a197; --badbg: #45241f;
+      --btn: #5aa86a; --btnhover: #6bb97b; --btnink: #1f1b17; --focus: #8fcf9a;
     }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink);
-         font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 32px 16px 64px; }
+         font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 0 16px 64px; }
   main { max-width: 640px; margin: 0 auto; }
-  h1 { font-size: 28px; margin: 0 0 4px; }
-  .lead { color: var(--dim); margin: 0 0 24px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin: 16px 0; }
-  .step { display: flex; gap: 14px; align-items: flex-start; }
-  .num { flex: 0 0 30px; height: 30px; border-radius: 50%; background: var(--line); display: grid; place-items: center;
-         font-weight: 700; font-size: 15px; }
-  .step.done .num { background: var(--goodbg); color: var(--good); }
-  .step h2 { font-size: 18px; margin: 2px 0 6px; }
-  .step p { margin: 0 0 10px; }
-  button { font: inherit; font-weight: 600; border: 0; border-radius: 12px; padding: 12px 22px; cursor: pointer;
-           background: var(--btn); color: var(--btnink); }
+  a { color: var(--good); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+  .hidden { display: none !important; }
+
+  /* the top bar */
+  .top { max-width: 640px; margin: 0 auto 36px; padding: 20px 0 14px; border-bottom: 1px solid var(--line);
+         display: flex; align-items: baseline; gap: 10px; }
+  .brand { font-weight: 800; font-size: 21px; letter-spacing: .02em; }
+  .brand-sub { color: var(--dim); font-size: 15px; }
+
+  h1 { font-size: 30px; line-height: 1.2; margin: 0 0 10px; letter-spacing: -.01em; }
+  .lead { font-size: 18px; margin: 0 0 14px; }
+  .meta { margin: 0 0 6px; }
+  .chip { display: inline-block; font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: 999px;
+          background: var(--soft); border: 1px solid var(--line); }
+  .chip.none { color: var(--dim); font-weight: 500; }
+
+  .whatsnew { margin: 6px 0 0; }
+  .whatsnew summary { color: var(--good); font-weight: 600; font-size: 15px; }
+  .whatsnew ul { margin: 8px 0 0; padding-left: 20px; }
+  .whatsnew li { margin: 4px 0; }
+
+  /* the three steps, linked by a thin line */
+  .steps { list-style: none; margin: 28px 0 0; padding: 0; position: relative; }
+  .steps::before { content: ""; position: absolute; left: 38px; top: 40px; bottom: 40px; width: 2px; background: var(--line); }
+  .step { position: relative; display: flex; gap: 16px; align-items: flex-start; background: var(--card);
+          border: 1px solid var(--line); border-radius: 18px; padding: 22px 22px 22px 20px; margin: 0 0 18px;
+          transition: opacity .2s, border-color .2s; }
+  .step.now { border-color: var(--btn); box-shadow: 0 1px 0 var(--line), 0 6px 18px -12px rgba(63, 54, 45, .45); }
+  .step.todo > * { opacity: .5; }               /* not the card itself: the line behind it stays hidden */
+  .num { flex: 0 0 36px; height: 36px; border-radius: 50%; background: var(--soft); border: 1px solid var(--line);
+         display: grid; place-items: center; font-weight: 700; font-size: 16px; }
+  .step.now .num { background: var(--btn); border-color: var(--btn); color: var(--btnink); }
+  .step.done .num { background: var(--goodbg); border-color: var(--goodbg); color: var(--good); font-size: 0; }
+  .step.done .num::after { content: "✓"; font-size: 18px; }
+  .body { flex: 1; min-width: 0; }
+  .step h2 { font-size: 19px; margin: 4px 0 6px; }
+  .step p { margin: 0 0 12px; }
+  .hint { font-size: 14px; color: var(--dim); }
+  q { quotes: "\201C" "\201D"; font-weight: 600; }
+
+  button, .button-link { font: inherit; font-weight: 650; border: 0; border-radius: 12px; padding: 13px 26px; min-width: 170px;
+           cursor: pointer; background: var(--btn); color: var(--btnink); text-decoration: none; display: inline-block; text-align: center; }
+  button:hover:not(:disabled), .button-link:hover { background: var(--btnhover); }
   button:disabled { opacity: .45; cursor: default; }
-  .note { border-radius: 12px; padding: 12px 14px; margin: 12px 0 0; }
-  .good { background: var(--goodbg); color: var(--good); }
-  .care { background: var(--carebg); color: var(--care); }
-  .bad  { background: var(--badbg); color: var(--bad); }
-  .hidden { display: none; }
-  .bar { height: 12px; border-radius: 6px; background: var(--line); overflow: hidden; margin: 10px 0 4px; }
-  .bar > div { height: 100%; width: 0; background: var(--btn); transition: width .2s; }
-  .small { font-size: 13px; color: var(--dim); }
-  table { border-collapse: collapse; margin: 6px 0 10px; }
-  td { padding: 2px 14px 2px 0; }
-  details { margin-top: 18px; }
-  summary { cursor: pointer; color: var(--dim); font-size: 14px; }
-  pre { font: 12px/1.4 ui-monospace, Menlo, monospace; background: var(--bg); border: 1px solid var(--line);
+  button.quiet { min-width: 0; padding: 6px 14px; font-size: 14px; background: var(--soft); color: var(--ink); border: 1px solid var(--line); }
+
+  .note { border-radius: 12px; padding: 12px 14px; margin: 14px 0 0; }
+  .note.info { background: var(--soft); color: var(--ink); }
+  .note.good { background: var(--goodbg); color: var(--good); }
+  .note.bad  { background: var(--badbg); color: var(--bad); }
+
+  .bar { height: 12px; border-radius: 6px; background: var(--soft); border: 1px solid var(--line); overflow: hidden; margin: 14px 0 6px; }
+  .bar > div { height: 100%; width: 0; background: var(--btn); transition: width .3s; }
+  .progtext { font-weight: 600; }
+  .calm { font-size: 14px; color: var(--dim); margin: 14px 0 0; }
+
+  /* the end */
+  .finish { display: flex; gap: 16px; align-items: center; background: var(--goodbg); color: var(--good);
+            border-radius: 18px; padding: 22px; margin: 0 0 18px; }
+  .finish h2 { font-size: 22px; margin: 0 0 2px; }
+  .finish p { margin: 0; color: var(--ink); }
+  .tick { flex: 0 0 52px; height: 52px; border-radius: 50%; background: var(--btn); color: var(--btnink);
+          display: grid; place-items: center; font-size: 28px; font-weight: 700; }
+
+  .alt { text-align: center; color: var(--dim); font-size: 15px; margin: 4px 0 0; }
+
+  /* this browser can't: not an error, the file way is right below */
+  .callout { background: var(--carebg); border-radius: 16px; padding: 18px 20px; margin: 28px 0 16px; }
+  .callout b { display: block; margin-bottom: 2px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; margin: 18px 0; }
+  .route-file h2 { font-size: 19px; margin: 0 0 2px; }
+  .sub { color: var(--dim); margin: 0 0 14px; }
+  .route-file .sub:last-child { margin: 14px 0 0; font-size: 15px; }
+  ol.plain { margin: 0; padding-left: 22px; }
+  ol.plain li { margin: 8px 0; padding-left: 4px; }
+  ol.plain .button-link { margin: 2px 0 4px; }
+
+  /* having trouble? */
+  .help { margin: 40px 0 0; }
+  .help h2 { font-size: 19px; margin: 0 0 6px; }
+  .help details { border-top: 1px solid var(--line); padding: 12px 0; }
+  .help details:last-child { border-bottom: 1px solid var(--line); }
+  .help summary { cursor: pointer; font-weight: 600; }
+  .help details p { margin: 8px 0 0; }
+
+  .tech { margin-top: 28px; }
+  .tech summary { cursor: pointer; color: var(--dim); font-size: 14px; }
+  .tech button { margin: 10px 0 0; }
+  pre { font: 12px/1.4 ui-monospace, Menlo, monospace; background: var(--card); border: 1px solid var(--line);
         border-radius: 10px; padding: 10px; max-height: 260px; overflow: auto; white-space: pre-wrap; }
-  .latest { display: inline-block; font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: 999px;
-            background: var(--line); color: var(--ink); margin: 0 0 8px; }
-  .latest.none { color: var(--dim); font-weight: 500; }
-  .howto h2 { font-size: 17px; margin: 0 0 8px; }
-  .howto ol { margin: 0; padding-left: 22px; }
-  .howto li { margin: 3px 0; }
-  .howto .small { margin: 10px 0 0; }
+  .small { font-size: 13px; color: var(--dim); }
+
   footer { max-width: 640px; margin: 40px auto 0; padding-top: 14px; border-top: 1px solid var(--line);
            color: var(--dim); font-size: 14px; }
-  .grow { flex: 1; }
-  a { color: var(--good); }
   footer a { color: var(--dim); }
+
+  /* privacy and licence pages */
+  .doc { padding-top: 32px; }
+  .top + .doc { padding-top: 0; }
+  .doc h1 { font-size: 28px; }
   .doc h2 { font-size: 20px; margin: 28px 0 8px; }
   .doc h3 { font-size: 16px; margin: 18px 0 4px; }
   .doc p, .doc li { margin: 6px 0; }
@@ -59,3 +125,14 @@
   .doc th, .doc td { text-align: left; vertical-align: top; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); }
   .doc details pre { max-height: 360px; }
   .doc code { font: 13px ui-monospace, Menlo, monospace; }
+
+  @media (max-width: 480px) {
+    .top { margin-bottom: 24px; }
+    h1 { font-size: 26px; }
+    .lead { font-size: 17px; }
+    .step { padding: 18px 16px; gap: 12px; }
+    .steps::before { left: 33px; }
+    .num { flex-basis: 34px; height: 34px; }
+    button { width: 100%; }
+    .finish { padding: 18px; }
+  }
