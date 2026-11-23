@@ -1,5 +1,5 @@
 // licenses.js — links the current release's relink kit on licenses.html.
-import { readLatest } from "./flash.js";
+import { readLatest } from "./flash.js?v=7aceeff607";
 
 const el = document.getElementById("kit");
 try {

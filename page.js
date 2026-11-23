@@ -1,7 +1,7 @@
 // page.js — the update page (index.html). A file of its own, so the page's
 // Content-Security-Policy can forbid inline scripts.
 import { ESPLoader, Transport } from "./vendor/esptool-js-0.6.1/bundle.js";
-import { readLatest, loadRelease, readHubVersion, flashHub, browserSupport, portBusy } from "./flash.js";
+import { readLatest, loadRelease, readHubVersion, flashHub, browserSupport, portBusy } from "./flash.js?v=7aceeff607";
 
 const $ = (id) => document.getElementById(id);
 const show = (id, on = true) => $(id).classList.toggle("hidden", !on);
@@ -19,8 +19,8 @@ const builtMonth = (b) => { const m = /^(\w{3})\s+\d+\s+(\d{4})/.exec(b || ""); 
 let release = null, port = null;
 
 // the port is held by another program (flash.js portBusy)
-const BUSY = "<b>Another program is using your hub's connection.</b> This is usually a serial monitor " +
-  "(like the Arduino IDE's) or this page open in another tab. Close it, unplug the hub, plug it back in and press Connect again.";
+const BUSY = "<b>Something else is using your hub's connection</b>, most often this page open in another tab. " +
+  "Close it, unplug the hub, plug it back in and press Connect again.";
 
 // Web Serial: Chrome, Edge, Firefox 151+ on a computer (flash.js browserSupport).
 // Not an error: the file way works just as well, and it's right below.
